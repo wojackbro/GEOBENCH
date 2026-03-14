@@ -1,0 +1,41 @@
+# Data and outputs
+data/
+*.zip
+CityLens/Results/
+CityLens/Benchmark/
+CityLens-Data/
+CityLens-data/
+
+# Nested repo (we track CityLens files but not its .git)
+CityLens/.git/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+citylens_env/
+.env
+.env.local
+
+# API keys / secrets (do not commit)
+*.key
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Logs
+logs/
+*.log
