@@ -19,7 +19,7 @@ cd "$(dirname "$0")"
 
 # Default: https://github.com/wojackbro
 GITHUB_USERNAME="${GITHUB_USERNAME:-wojackbro}"
-REPO_NAME="${GITHUB_REPO_NAME:-geo_ai1}"
+REPO_NAME="${GITHUB_REPO_NAME:-GEOBENCH}"
 URL="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}.git"
 
 if [ -z "$GITHUB_USERNAME" ]; then
