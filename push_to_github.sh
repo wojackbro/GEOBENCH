@@ -17,6 +17,11 @@
 set -e
 cd "$(dirname "$0")"
 
+# Default: https://github.com/wojackbro
+GITHUB_USERNAME="${GITHUB_USERNAME:-wojackbro}"
+REPO_NAME="${GITHUB_REPO_NAME:-geo_ai1}"
+URL="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}.git"
+
 if [ -z "$GITHUB_USERNAME" ]; then
   echo "Set your GitHub username:"
   echo "  export GITHUB_USERNAME=your-username"
@@ -26,9 +31,6 @@ if [ -z "$GITHUB_USERNAME" ]; then
   echo "  gh repo create geo_ai1 --private --source=. --remote=origin --push"
   exit 1
 fi
-
-REPO_NAME="${GITHUB_REPO_NAME:-geo_ai1}"
-URL="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}.git"
 
 if git remote get-url origin 2>/dev/null | grep -q REPLACE_WITH_YOUR_USERNAME; then
   git remote set-url origin "$URL"
