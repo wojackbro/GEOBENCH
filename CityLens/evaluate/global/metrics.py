@@ -47,10 +47,12 @@ def process_json(json_path, prompt_type):
 
     for item in data:
         if prompt_type == "simple":
-            true_val = extract_float(item['reference'])
+            true_val = extract_float(item.get('reference'))
         elif prompt_type == "normalized":
-            true_val = extract_float(item['reference_normalized'])
-        pred_val = extract_float(item['response'])
+            true_val = extract_float(item.get('reference_normalized') or item.get('reference'))
+        else:
+            true_val = extract_float(item.get('reference'))
+        pred_val = extract_float(item.get('response'))
         if true_val is None or pred_val is None:
             print(f"Warning: Invalid data found in item: {item['response']}")
             continue

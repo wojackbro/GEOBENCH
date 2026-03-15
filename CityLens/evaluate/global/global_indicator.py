@@ -235,7 +235,7 @@ def single_eval_task(args):
     elif prompt_type == "map":
         session = generate_session_map(city, d, task_name)
     reference = d["reference"]
-    reference_normalized = d["reference_normalized"]
+    reference_normalized = d.get("reference_normalized", reference)  # fallback if task JSON has only reference
     img_path = d["images"]
 
     ret = get_response_mllm_api(session, model_name, temperature=0, max_tokens=2000, infer_server=None,json_mode=False)
