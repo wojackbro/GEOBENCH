@@ -1,105 +1,122 @@
-# Prithvi + CityLens Research
+# GeoBench: CityLens Geospatial FM Workflow
 
-Novel research: geospatial foundation models (Prithvi) on the CityLens benchmark, with transfer learning from UK data.
+This repository tracks an end-to-end workflow for CityLens regression experiments, centered on:
 
----
+- `prithvi_rgb_lora` (satellite geospatial FM adaptation)
+- controlled satellite baselines (`dinov2_sat`, `resnet50_sat`)
+- planned street-only and fusion phases (`clip_vitb16`, `late`, `gated`)
 
-## Run everything in Colab (recommended)
+## Current status
 
-Use **`colab_citylens_full.ipynb`** in Google Colab so you don’t download ~10 GB on your machine:
+- Satellite-only comparison is complete for `gdp`, `acc2health`, `build_height`, `pop`.
+- `prithvi_rgb_lora` is the strongest model across those four tasks.
+- Important caveat: `gdp + resnet50_sat` shows failed behavior (highly negative R2) and is reported transparently.
+- Street-only, fusion, per-city, and full XAI analysis are pending.
 
-1. Upload `colab_citylens_full.ipynb` to [Google Colab](https://colab.research.google.com) (or open from Drive).
-2. Run all cells in order. The notebook will:
-   - Clone the CityLens repo
-   - Add path config and patch eval code for Colab
-   - Download **Tianhui-Liu/CityLens-Data** from Hugging Face to Colab disk (~10 GB)
-   - Install dependencies and run the GDP baseline (GPT-4o)
-3. Set your `OPENAI_API_KEY` when prompted (or in Colab Secrets).
+See:
 
-No local download or venv needed.
+- `docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`
+- `docs/PAPER_CONFERENCE_DRAFT.md`
+- `docs/PAPER_Q1_JOURNAL_DRAFT.md`
+- `docs/PRITHVI_SATELLITE_REFERENCE.md`
+- `docs/GLOBAL_LEARNED_PIPELINE.md`
 
----
+## Recommended execution path
 
-## Quick setup (Phase 1) – local
+### 1) Use Colab notebooks
 
-### 1. Download CityLens data (Task 1)
+- `colab_citylens_full.ipynb`: full setup + pipeline notebook
+- `colab_citylens_baseline_compare.ipynb`: compact baseline comparison notebook
 
-**Correct dataset:** [Tianhui-Liu/CityLens-Data](https://huggingface.co/datasets/Tianhui-Liu/CityLens-Data) on Hugging Face (not abidhossain123).
+Both are designed to run with checkpoint-safe behavior (`--resume --skip_if_done`) for restart resilience.
 
-From project root:
+### 2) Data root
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install huggingface_hub
-python scripts/download_citylens.py
-```
+Set `CITYLENS_DATA_ROOT` to the folder containing:
 
-Data is extracted to `data/CityLens-Data/`. If the zip has an extra top-level folder, set `CITYLENS_DATA_ROOT` to the folder that directly contains `Benchmark/`, `Dataset/`, `satellite_image/`, `street_view_image/`.
+- `Benchmark/`
+- `Dataset/`
+- `satellite_image/`
+- `street_view_image/`
 
-### 2. Set up evaluation environment (Task 2)
+### 3) Core global learned commands
 
-**Option A – venv (recommended on macOS):**
-
-```bash
-source .venv/bin/activate
-pip install -r CityLens/requirements.txt
-```
-
-**Option B – conda (if you prefer):**
+Run from `CityLens/` root:
 
 ```bash
-conda create -n citylens python=3.10
-conda activate citylens
-pip install -r CityLens/requirements.txt
+# Satellite-only
+python -m evaluate.global_learned.train \
+  --task_name all \
+  --branch satellite \
+  --satellite_model prithvi_rgb_lora \
+  --epochs 5 \
+  --batch_size 8 \
+  --image_size 224 \
+  --seed 42 \
+  --skip_if_done \
+  --resume
+
+# Street-only
+python -m evaluate.global_learned.train \
+  --task_name all \
+  --branch street \
+  --street_model clip_vitb16 \
+  --pooling mean \
+  --epochs 5 \
+  --batch_size 8 \
+  --image_size 224 \
+  --seed 42 \
+  --skip_if_done \
+  --resume
+
+# Fusion
+python -m evaluate.global_learned.train \
+  --task_name all \
+  --branch fusion \
+  --satellite_model prithvi_rgb_lora \
+  --street_model clip_vitb16 \
+  --fusion_type late \
+  --pooling mean \
+  --epochs 5 \
+  --batch_size 8 \
+  --image_size 224 \
+  --seed 42 \
+  --skip_if_done \
+  --resume
 ```
 
-Set API key for GPT-4o (or your LVLM provider):
+## Checkpoint and resume rules (critical)
 
-```bash
-export OPENAI_API_KEY="..."   # for GPT-4o; or see CityLens README for Azure/DeepInfra
-```
+- Artifacts are saved under `Results/global_learned/<task>/<experiment_name>/`.
+- Checkpoints: `checkpoints/best.pt` and `checkpoints/last.pt`.
+- Resume only works within the same experiment folder.
+- Experiment names include `ep{epochs}`:
+  - changing `--epochs` creates a new folder
+  - new folder means no automatic resume from old folder unless checkpoint is copied intentionally
 
-### 3. Reproduce one baseline (Task 3) – GDP with GPT-4o
+## Outputs you should expect
 
-From project root:
+Per experiment:
 
-```bash
-source .venv/bin/activate   # or: conda activate citylens
-export CITYLENS_DATA_ROOT="$(pwd)/data/CityLens-Data"
-cd CityLens
-python -m evaluate.global.global_indicator --city_name=all --mode=eval --model_name=gpt-4o --prompt_type=simple --num_process=10 --task_name=gdp
-python -m evaluate.global.metrics --city_name=all --model_name=gpt-4o --prompt_type=simple --task_name=gdp
-```
+- `config.json`
+- `dataset_report.json`
+- `history.csv`
+- `metrics.json`
+- `val_predictions.csv`
+- `per_city_metrics.json`
+- `per_city_metrics.csv`
+- `checkpoints/best.pt`
+- `checkpoints/last.pt`
 
-**Note:** The repo expects pre-built task JSONs in `Benchmark/` (e.g. `gdp_all.json`) and an `image_urls.csv` for API-based eval. If the zip uses different names, adjust `CityLens/path_config.py` or symlink files. Run `python scripts/verify_data_structure.py` after extracting to see the layout.
+Global logs:
 
-### 4. Document (Task 4)
+- `Results/global_learned/experiment_log.csv`
+- `Results/global_learned/splits/*.json`
 
-Fill in `docs/BASELINE_LOG.md` with exact commands, metrics (MSE, MAE, R², RMSE), and success/failure notes.
+## Next milestones
 
----
-
-## Phase 1 checklist
-- [x] Clean workspace, fresh start
-- [ ] Task 1: Download CityLens dataset (run `scripts/download_citylens.py`)
-- [ ] Task 2: Set up env (venv + `pip install -r CityLens/requirements.txt`, or conda)
-- [ ] Task 3: Reproduce one baseline (GPT-4o on GDP; see commands above)
-- [ ] Task 4: Document in `docs/BASELINE_LOG.md`
-
-## Phase 2 (Weeks 3–8)
-- Task 5: Load Prithvi, extract features for all satellite images
-- Task 6: Fine-tune Prithvi on CityLens (Experiment 1)
-- Task 7: UK data (IMD + Sentinel-2) for transfer (Experiment 2)
-- Task 8: Ensemble Prithvi + LVLM features (Experiment 3)
-
-## Phase 3 (Weeks 9–12)
-- Task 9: Ablation (tasks/cities)
-- Task 10: Visualizations
-- Task 11: Draft paper
-
-## Layout
-- `data/` — CityLens and other datasets
-- `CityLens/` — Cloned evaluation repo (with `path_config.py` for data root)
-- `scripts/` — Download, feature extraction, training
-- `docs/` — BASELINE_LOG.md, RESEARCH_PLAN.md, experiment logs
+- complete street-only matrix (`clip_vitb16`, `resnet50`, `dinov2_vitb14`)
+- complete fusion matrix (`late`, `gated`)
+- run per-city error analysis
+- run XAI package (`explain.py`) and integrate qualitative findings into paper drafts
+- add multi-seed confidence intervals for publication-grade claims
