@@ -1,47 +1,58 @@
-# Official Technical Report: Satellite-Only Baseline Phase
+# Official Technical Report: CityLens Satellite-Only Phase
 
-## Project
+## 1) Executive Summary
 
-**Title:** Geospatial Foundation Model Adaptation for CityLens Global-Task Regression  
-**Repo:** `wojackbro/GEOBENCH`  
-**Phase:** Satellite-only model comparison (completed)  
-**Date:** 2026-03-19
+This report documents the completed satellite-only comparison stage of our CityLens learned-model pipeline.  
+Under matched training settings, `prithvi_rgb_lora` consistently outperforms `dinov2_sat` and `resnet50_sat` on all finalized tasks in this phase (`gdp`, `acc2health`, `build_height`, `pop`).
 
-## Scope of this report
+Key caveat: `gdp + resnet50_sat` is a failed baseline behavior (R2 = `-4.0046`) and is reported transparently as instability/mismatch, not as competitive performance.
 
-This report documents the completed satellite-only comparison stage for CityLens global tasks:
+## 2) Benchmark Context and Positioning
+
+CityLens is a multimodal urban socioeconomic benchmark introduced as a large-scale evaluation framework for visual models across tasks and cities.  
+Our current work is a controlled **satellite-only** stage designed to answer a narrower question:
+
+> Does a geospatially adapted satellite model (`prithvi_rgb_lora`) outperform generic satellite backbones under matched protocol in CityLens global-task regression?
+
+This report does **not** claim final multimodal leadership yet. Street-only, fusion, per-city, and full XAI synthesis are scheduled as next-stage deliverables.
+
+## 3) Scope of This Phase
+
+### Completed tasks
 
 - `gdp`
 - `acc2health`
 - `build_height`
 - `pop`
 
-Note: the full learned pipeline defines five global tasks (`gdp`, `pop`, `acc2health`, `carbon`, `build_height`). This completed phase reports the four tasks with finalized comparable outputs; `carbon` remains queued for the extension phase.
+### Models compared
 
-Models compared:
-
-- `prithvi_rgb_lora` (adapted geospatial foundation model)
-- `dinov2_sat` (generic vision transformer baseline)
+- `prithvi_rgb_lora` (geospatial FM adaptation with LoRA)
+- `dinov2_sat` (generic ViT baseline)
 - `resnet50_sat` (generic CNN baseline)
 
-Branch used: `satellite` only (no street-view input in this phase).
+### Out-of-scope for this report
 
-## Experimental protocol
+- street-only results
+- fusion (`late`, `gated`) results
+- per-city ranking and fairness audit integration
+- multi-seed confidence intervals
 
-### Shared setup
+Note: the full learned pipeline covers `gdp`, `pop`, `acc2health`, `carbon`, `build_height`; `carbon` is reserved for the extension round.
+
+## 4) Experimental Protocol (Matched Setup)
 
 - branch: `satellite`
 - image size: `224`
 - batch size: `8`
 - seed: `42`
 - target transform: `log1p`
-- lr: `2e-4`
-- backbone lr: `2e-4`
+- lr/backbone lr: `2e-4`
 - head lr: `1e-3`
 - weight decay: `1e-2`
-- val fraction: `0.1`
-- checkpointing: `best.pt` and `last.pt`
-- resume flags: `--resume --skip_if_done`
+- validation fraction: `0.1`
+- checkpointing: `best.pt`, `last.pt`
+- restart safety: `--resume --skip_if_done`
 
 ### Epoch budgets
 
@@ -50,13 +61,12 @@ Branch used: `satellite` only (no street-view input in this phase).
 - `build_height`: 30
 - `pop`: 5
 
-### Reproducibility conditions
+### Reproducibility note
 
-- Task splits are reused by branch/seed/validation fraction (`Results/global_learned/splits/...`).
-- Runs are logged under `CITYLENS_DATA_ROOT/Results/global_learned/<task>/<experiment_name>/`.
-- Experiment folder names include `ep{epochs}`. Changing `--epochs` creates a different folder, so resume is folder-local unless checkpoints are copied intentionally.
+Experiment folders encode `ep{epochs}`.  
+Changing `--epochs` creates a new directory, so resume is folder-local unless checkpoint migration is performed intentionally.
 
-## Main results
+## 5) Results
 
 | Task | Model | Best Epoch | R2 | RMSE | MAE |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -73,93 +83,71 @@ Branch used: `satellite` only (no street-view input in this phase).
 | pop | prithvi_rgb_lora | 2 | -0.0324 | 21641.25 | 10020.26 |
 | pop | resnet50_sat | 2 | -0.2661 | 23965.72 | 11871.83 |
 
-## Primary findings
+## 6) Findings
 
-1. `prithvi_rgb_lora` outperforms both generic satellite baselines on all reported tasks.
-2. Gains are strongest on:
-   - `build_height` (0.8599 vs 0.8004 vs 0.6791)
-   - `gdp` (0.5808 vs 0.4535 vs -4.0046)
-3. All models underperform on `pop` (negative R2), but Prithvi is the least poor.
+1. `prithvi_rgb_lora` is best on all four finalized tasks.
+2. Largest practical gap appears on `build_height` and `gdp`.
+3. `pop` remains difficult for all backbones (negative R2), indicating unresolved signal/label complexity under this phase design.
 
-## Important caveat: GDP + ResNet instability
+## 7) Mandatory Caveat: Failed Baseline Behavior
 
-`gdp + resnet50_sat` produced highly negative R2 (`-4.0046`), indicating a pathological failure mode under the current training setup.
+`gdp + resnet50_sat` gives R2 = `-4.0046`.
 
-Possible causes:
+Interpretation:
 
-- optimization instability with this backbone under shared LR schedule
-- weak target alignment for heavy-tailed GDP with current head/backbone parameterization
-- poor feature-target geometry from generic ImageNet features in this remote-sensing-like regression setting
-- target-transform sensitivity (`log1p` decode in raw-space evaluation) amplifying prediction collapse
+- this is a failed run behavior under current setup
+- it may indicate instability, optimization mismatch, or poor representation-task fit
+- it should be reported as a negative control outcome, not used to inflate Prithvi gains
 
-Reporting guidance:
+## 8) Architecture-Level Interpretation (Hypotheses)
 
-- keep the value in the table for transparency
-- explicitly mark this as a failed baseline behavior
-- do not over-claim from this single unstable point
+### Why Prithvi is strong in this phase
 
-## Architecture-based interpretation (working hypothesis)
+- EO-oriented priors likely improve morphology/context encoding from satellite views.
+- LoRA adaptation preserves useful pretrained structure while allowing task fitting.
+- Gains align with structurally visible tasks (`build_height`) and macro-pattern tasks (`gdp`).
 
-### Why Prithvi likely wins
+### Why DINOv2 is competitive but below Prithvi
 
-- Prithvi carries EO-oriented inductive biases from geospatial pretraining.
-- Even with RGB-to-6 adaptation, it appears to capture built-form and spatial context more effectively than generic backbones.
-- This aligns with strongest gains on morphology-heavy tasks (`build_height`) and macro-structure-sensitive tasks (`gdp`).
+- strong generic representation quality
+- weaker domain alignment for socioeconomic satellite regression compared with EO-adapted encoder
 
-### Why DINOv2 is mid-tier
+### Why ResNet may break on GDP
 
-- ViT representations are strong and general, but not specialized for remote-sensing socioeconomic regression.
-- DINOv2 performs reasonably on `gdp` and `build_height`, but trails Prithvi consistently.
+- local texture bias may be insufficient for broad geospatial semantics
+- shared LR schedule may be suboptimal for this backbone/task pair
+- GDP heavy-tail sensitivity can amplify regression instability
 
-### Why ResNet can fail
+## 9) Explainability and Verification Plan
 
-- CNN local texture bias may be less suitable for long-range global context in this benchmark.
-- Under a shared optimizer schedule, it appears less stable in GDP regression.
-
-## Why `clip_vitb16` is the current street default
-
-Planned street branch starts with `clip_vitb16` because:
-
-- strong generic image-text visual features
-- practical memory/throughput profile in Colab
-- established baseline in existing project pipeline
-
-This does **not** imply it is universally best for street tasks. Planned comparison (`resnet50`, `clip_vitb16`, `dinov2_vitb14`) is still required.
-
-## Explainability status and value
-
-The pipeline already supports:
+Implemented hooks in pipeline:
 
 - satellite integrated gradients
 - street leave-one-view-out
 - fusion modality ablation
 
-Planned use:
+Planned use in next phase:
 
-- validate whether the model attends to plausible built-form and infrastructure regions
-- test whether failure cases (`pop`, unstable GDP baselines) correspond to diffuse or collapsed saliency
-- support, not replace, quantitative claims
+- validate whether strong/weak predictions align with plausible regions
+- compare saliency concentration between successful and failed baselines
+- avoid causal over-claims; treat XAI as consistency evidence
 
-## Limitations of current phase
+## 10) Publication-Ready Claim Boundary
 
-- no street-only results yet in this report
-- no fusion (`late`, `gated`) results yet in this report
-- no completed per-city cross-model analysis yet
-- no multi-seed variance analysis yet
+### Supported claim now
 
-## Actionable next phase (already planned)
+In CityLens satellite-only global-task regression under matched settings, adapted Prithvi consistently outperforms generic satellite baselines.
 
-1. Street-only baseline with `clip_vitb16` (then other street encoders).
-2. Fusion baseline with `late`, then `gated`.
-3. Per-city comparisons and failure-mode analysis.
-4. Explainability section for qualitative validation.
+### Not yet supported
 
-## Current claim boundary
+- multimodal superiority claims
+- final per-city robustness/fairness conclusions
+- statistically strong cross-seed confidence claims
 
-Supported now:
+## 11) Next Deliverables
 
-> In satellite-only global-task regression on CityLens, adapted Prithvi (`prithvi_rgb_lora`) consistently outperforms generic satellite backbones (`dinov2_sat`, `resnet50_sat`) under matched settings.
-
-Not yet supported:
-
-> Full multimodal superiority claims over street-only or fusion alternatives.
+1. Street-only matrix (`clip_vitb16`, `resnet50`, `dinov2_vitb14`)
+2. Fusion matrix (`late`, `gated`)
+3. Per-city and error taxonomy analysis
+4. Multi-seed uncertainty and significance pass
+5. Final integrated manuscript version (conference and journal)

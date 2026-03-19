@@ -1,107 +1,115 @@
-# Q1 Journal Draft (Comprehensive Version)
+# Q1 Journal Draft (Full-Length Structure)
 
-## Provisional Title
+## Title
 
-**From Generic Vision to Geospatial Foundation Models: A Reproducible CityLens Study with Satellite-Only Controls and Multimodal Roadmap**
+**Geospatial Foundation Model Adaptation for Urban Socioeconomic Sensing: Controlled Satellite-Only Evidence on CityLens with a Multimodal Extension Framework**
 
 ## Abstract
 
-Urban socioeconomic sensing from Earth observation and street-view imagery has become a central benchmark problem for modern vision systems. However, rigorous controlled analyses that isolate the value of geospatial pretraining remain limited. We present a reproducible CityLens study centered on satellite-only global-task regression using an adapted geospatial foundation model (`prithvi_rgb_lora`) against two strong generic controls (`dinov2_sat`, `resnet50_sat`). Under matched protocols, Prithvi achieves the best R2 across `gdp`, `acc2health`, `build_height`, and `pop`. We explicitly document an unstable baseline outcome (`gdp + resnet50_sat`, R2 = -4.00) as failed behavior rather than a competitive result. We further provide a full multimodal roadmap (street-only, late/gated fusion, per-city diagnostics, and explainability analyses) and discuss how XAI can validate mechanistic hypotheses without over-claiming causality. This paper emphasizes transparent failure reporting, reproducibility, and phase-wise evidence building for high-integrity urban AI research.
+Urban socioeconomic sensing from visual data is increasingly evaluated through large benchmarks, yet controlled evidence isolating geospatial pretraining effects remains limited. We present a reproducible satellite-only study on CityLens global-task regression, comparing an adapted geospatial encoder (`prithvi_rgb_lora`) with generic controls (`dinov2_sat`, `resnet50_sat`) under matched splits and optimization settings. Across `gdp`, `acc2health`, `build_height`, and `pop`, `prithvi_rgb_lora` yields the highest R2 in all tasks. We explicitly report a failed baseline behavior (`gdp + resnet50_sat`, R2 = `-4.0046`) to avoid selective reporting. We then provide a staged multimodal roadmap (street-only, late/gated fusion, per-city diagnostics, and explainability integration) and clarify the inferential limits of XAI in this domain. The study emphasizes transparent benchmark practice, failure reporting, and phase-wise claim discipline for publication-grade urban AI research.
 
 ## 1. Introduction
 
-Estimating urban socioeconomic indicators from imagery is high-impact and high-risk. Progress is constrained by domain heterogeneity, target noise, and weakly observable causal pathways. CityLens offers a broad and practical benchmark, but many evaluations mix modality and model effects, making it difficult to isolate the contribution of geospatially specialized pretraining.
+Accurate, spatially resolved socioeconomic measurement is critical for urban planning and sustainability policy, but direct data collection is costly and often delayed. Vision-driven proxies from satellite and street imagery are attractive, yet predictive reliability remains heterogeneous across tasks, cities, and model families.
 
-This study takes a phase-wise approach:
+CityLens provides a comprehensive benchmark context; however, practical model development still needs controlled ablations that separate modality effects from encoder effects. This work focuses on that missing layer: a satellite-only, matched-protocol comparison of geospatial adaptation versus generic backbones.
 
-1. Fix protocol and compare satellite-only backbones.
-2. Quantify gains from geospatial adaptation vs generic controls.
-3. Expand to street-only and fusion only after satellite evidence is stabilized.
+### 1.1 Problem Statement
 
-### 1.1 Research Questions
+Given region-level satellite RGB imagery and scalar socioeconomic targets, identify which satellite backbone family provides the strongest and most stable regression behavior under controlled training settings.
 
-- **RQ1:** Does adapted geospatial pretraining improve CityLens satellite-only regression over generic backbones?
-- **RQ2:** Which tasks benefit most from this specialization?
-- **RQ3:** What failure signatures emerge, and what do they suggest about architecture-task mismatch?
-- **RQ4 (planned):** How do street and fusion modalities alter ranking and robustness?
+### 1.2 Research Questions
 
-### 1.2 Contributions
+- **RQ1:** Does geospatial adaptation (`prithvi_rgb_lora`) outperform generic satellite backbones on CityLens global tasks?
+- **RQ2:** Which tasks show strongest gains and which remain unresolved?
+- **RQ3:** What does failed baseline behavior reveal about architecture-task mismatch?
+- **RQ4 (planned):** How will street-only and fusion stages alter the ranking?
 
-- Controlled satellite-only benchmark with transparent caveat reporting.
-- Architecture-informed interpretation of success and failure patterns.
-- Reproducible pipeline with resume-safe checkpointing and structured outputs.
-- A publication-ready roadmap for multimodal and explainability extensions.
+### 1.3 Contributions
 
-## 2. Background and Literature Review
+- Satellite-only controlled comparison with matched hyperparameters and split reuse.
+- Task-level evidence that adapted Prithvi is consistently strongest in this phase.
+- Explicit failed-baseline disclosure (`gdp + resnet50_sat`).
+- Reproducibility package: checkpoint-safe training, standardized artifacts, explainability hooks.
+- Journal-ready extension plan for multimodal and robustness completion.
 
-### 2.1 Urban sensing benchmarks and CityLens context
+## 2. Literature Review
 
-CityLens evaluates socioeconomic/urban indicators across multiple domains and supports satellite and street-view modalities. Prior results motivate multimodal learning but also expose model-specific sensitivity to prompt strategy, data quality, and transfer assumptions.
+### 2.1 Urban socioeconomic sensing and benchmark evolution
 
-### 2.2 Remote sensing foundation models
+Recent work demonstrates growing LVLM capability but also instability in numeric socioeconomic prediction. CityLens advances benchmark breadth, yet method-level isolation (especially unimodal controlled comparisons) is still needed for reliable scientific attribution.
 
-Geospatial FMs encode priors from Earth-observation domains (spatial texture, land-use patterns, scale context). Such priors can transfer to urban proxy tasks even when direct modality alignment is imperfect.
+### 2.2 Geospatial pretraining and transfer
 
-### 2.3 Generic computer vision backbones
+Remote-sensing pretraining encodes spatial and land-use priors often absent from generic natural-image pretraining. This suggests potential transfer advantages for urban morphological and macro-pattern tasks.
 
-ResNet and DINOv2 remain strong transfer baselines. Their relative weakness on some socioeconomic tasks may reflect mismatch between generic pretraining objectives and geospatial regression targets.
+### 2.3 Generic visual backbones in regression
 
-### 2.4 Explainability in geospatial ML
+ResNet and DINOv2 remain key controls. Their efficacy depends on task semantics, target distributions, and optimization regime alignment.
 
-Saliency and ablation methods can detect brittle behavior and guide error analysis, but they do not establish causal truth. Best practice is triangulation: combine XAI with quantitative validation and stratified performance breakdowns.
+### 2.4 Explainability in multimodal urban ML
 
-## 3. Data, Tasks, and Evaluation
+Saliency and ablations can validate consistency of learned focus, but cannot by themselves establish socioeconomic causality. Robust conclusions require triangulation with quantitative analyses.
 
-### 3.1 Tasks in this phase
+## 3. Data, Tasks, and Evaluation Setup
+
+### 3.1 Tasks in this manuscript stage
 
 - `gdp`
 - `acc2health`
 - `build_height`
 - `pop`
 
-The full benchmark pipeline includes `carbon`. This manuscript stage reports four tasks with completed and validated satellite-only outputs; `carbon` is reserved for the next reporting increment.
+Pipeline continuation task:
 
-### 3.2 Inputs
+- `carbon` (planned extension)
 
-- Satellite RGB imagery (single-modality for this phase).
-- Street imagery excluded in this phase by design.
+### 3.2 Input modality
+
+- satellite RGB only (single-modality by design for this stage)
+- street imagery excluded to avoid modality confounding
 
 ### 3.3 Metrics
 
-- Primary: R2
-- Secondary: RMSE, MAE, MSE
-
-R2 is prioritized for cross-task comparative interpretation, with raw-space RMSE/MAE used to retain scale-aware error context.
+- primary: R2
+- secondary: RMSE, MAE, MSE
 
 ## 4. Methods
 
-### 4.1 Models
+### 4.1 Model families
 
-- `prithvi_rgb_lora`: geospatial FM adaptation via LoRA.
-- `dinov2_sat`: generic transformer baseline.
-- `resnet50_sat`: generic CNN baseline.
+- `prithvi_rgb_lora` (EO adaptation with LoRA)
+- `dinov2_sat` (generic ViT)
+- `resnet50_sat` (generic CNN)
 
-### 4.2 Optimization protocol
+### 4.2 Shared optimization protocol
 
-- image size 224, batch size 8, seed 42
-- `log1p` target transform
-- learning rates: 2e-4 (global/backbone), 1e-3 (head)
-- weight decay 1e-2
-- validation fraction 0.1
-- checkpointing and resume enabled
+- image size `224`
+- batch size `8`
+- seed `42`
+- target transform `log1p`
+- lr/backbone lr `2e-4`
+- head lr `1e-3`
+- weight decay `1e-2`
+- val fraction `0.1`
 
-Task-specific epoch budgets: GDP 20, Acc2Health 30, Build Height 30, Pop 5.
+Epoch budgets:
 
-### 4.3 Reproducibility design
+- `gdp`: 20
+- `acc2health`: 30
+- `build_height`: 30
+- `pop`: 5
 
-- deterministic split reuse per task/seed/val fraction
-- complete artifacts (`config`, `history`, `metrics`, predictions, checkpoints)
-- explicit run naming by task/model/hyperparameters
-- resume semantics are experiment-folder-specific because folder names encode epoch budget (`ep{epochs}`)
+### 4.3 Reproducibility protocol
+
+- split reuse by task/seed/val fraction
+- artifacts: `config.json`, `history.csv`, `metrics.json`, predictions, checkpoints
+- checkpoint policy: `best.pt`, `last.pt`, `--resume --skip_if_done`
+- experiment naming includes `ep{epochs}`, so resume is experiment-folder-specific
 
 ## 5. Results
 
-### 5.1 Aggregate results (R2)
+### 5.1 Main R2 table
 
 | Task | dinov2_sat | prithvi_rgb_lora | resnet50_sat |
 | --- | ---: | ---: | ---: |
@@ -112,76 +120,84 @@ Task-specific epoch budgets: GDP 20, Acc2Health 30, Build Height 30, Pop 5.
 
 ### 5.2 Observed ranking
 
-`prithvi_rgb_lora` > `dinov2_sat` > `resnet50_sat` on all tasks by R2, with the strongest separation on GDP and Build Height.
+`prithvi_rgb_lora` > `dinov2_sat` > `resnet50_sat` on all finalized tasks in this stage.
 
 ### 5.3 Mandatory caveat
 
-`gdp + resnet50_sat` is a failed baseline behavior (R2 = -4.00) and should be explicitly reported as instability/mismatch in this setting.
+`gdp + resnet50_sat` (R2 = `-4.0046`) is reported as failed baseline behavior, not as a normal competitive score.
 
 ## 6. Discussion
 
-### 6.1 Architecture-task alignment hypothesis
+### 6.1 Architecture-task alignment interpretation
 
-Prithvi may gain from EO-oriented priors that better match urban morphology and macro-structure cues. DINOv2 captures broad semantics but may lack geospatially tuned biases. ResNet may underperform where long-range contextual encoding is critical.
+The result pattern supports an EO-alignment hypothesis: geospatial priors improve extraction of urban structural cues relevant to socioeconomic proxy regression.
 
-### 6.2 Why does population remain hard?
+### 6.2 Why `pop` remains weak
 
-Negative R2 across all backbones suggests weak satellite-only observability for `pop` at this setup level, label granularity mismatch, or noisy proxy relationships.
+All backbones produce negative R2 on `pop`, suggesting weak observability under satellite-only inputs, target noise, or insufficient signal granularity for this setup.
 
-### 6.3 Implications for multimodal design
+### 6.3 GDP instability in ResNet baseline
 
-The satellite phase suggests a strong satellite anchor model (Prithvi). Planned street/fusion experiments should test whether complementary street signals improve difficult tasks (especially `pop` and potentially `acc2health`).
+Likely contributors:
 
-## 7. Explainable AI Plan and Scientific Value
+- backbone-optimizer mismatch in shared schedule
+- insufficient long-range context representation
+- heavy-tail sensitivity of GDP target under current objective
 
-### 7.1 What can be tested now
+### 6.4 Implications for multimodal stage
 
-- Integrated gradients on satellite predictions.
-- Failure-case saliency for `pop` and unstable GDP baselines.
+Satellite stage establishes `prithvi_rgb_lora` as anchor backbone. Street/fusion stages should test whether complementary street semantics improve unresolved tasks, especially `pop`.
 
-### 7.2 What to test after street/fusion runs
+## 7. Explainable AI Integration Plan
 
-- Street leave-one-view-out to quantify view contribution.
-- Fusion modality ablation (drop satellite/street branch).
-- Correlate saliency concentration with error and uncertainty.
+### 7.1 What is already executable
 
-### 7.3 What XAI cannot prove
+- satellite integrated gradients
+- street leave-one-view-out
+- fusion modality ablation
 
-XAI cannot independently prove causal mechanisms. It should be framed as consistency evidence, not causal confirmation.
+### 7.2 Planned journal-level analysis
+
+- align saliency concentration with error buckets
+- compare attention profiles for success vs failure cases
+- integrate per-city XAI exemplars in supplement
+
+### 7.3 Causality caution
+
+XAI is evidence of model behavior consistency, not proof of socioeconomic causation.
 
 ## 8. Limitations
 
-- single-seed main comparison
-- no multimodal results yet in this manuscript version
-- no per-city significance testing yet
-- no uncertainty calibration analysis yet
+- current stage is satellite-only
+- single-seed primary comparison
+- no full per-city fairness/robustness section yet
+- no uncertainty calibration in current manuscript
 
-## 9. Future Work
+## 9. Future Work (Manuscript Completion Plan)
 
 - [TODO] Street-only matrix (`clip_vitb16`, `resnet50`, `dinov2_vitb14`)
 - [TODO] Fusion matrix (`late`, `gated`)
-- [TODO] Per-city and cross-city robustness analysis
-- [TODO] Multi-seed confidence intervals and significance tests
-- [TODO] Extended XAI qualitative atlas + quantitative alignment checks
+- [TODO] Per-city performance/failure taxonomy
+- [TODO] Multi-seed confidence intervals + significance tests
+- [TODO] Expanded XAI atlas and error-linked interpretation
+- [TODO] Full cross-reference against CityLens official paradigms
 
-## 10. Conclusion
+## 10. Ethics, Fairness, and Misuse Considerations
 
-This study provides reproducible evidence that an adapted geospatial foundation model is a stronger satellite-only baseline than generic vision backbones on CityLens global tasks under matched settings. The result is promising but phase-bounded. A complete claim requires the planned street-only, fusion, per-city, and multi-seed analyses.
+Socioeconomic prediction from imagery is sensitive. Outputs should be used for aggregate research benchmarking only. High-stakes deployment requires fairness evaluation, uncertainty communication, and institutional oversight.
 
-## 11. Practical Positioning for Publication
+## 11. Reproducibility Statement
 
-### Conference version (short-form)
+This work documents model/task setup, protocol, artifacts, and checkpoint semantics for rerunnable experiments. Remaining work for journal-grade reproducibility includes multi-seed robustness, external transfer checks, and full environment hash publication.
 
-Focus on controlled satellite-only evidence, transparent failed baseline reporting, and concise methodology.
+## 12. Conclusion
 
-### Q1 journal version (full-form)
+Controlled satellite-only evidence indicates that adapted Prithvi is a stronger CityLens regression backbone than generic satellite controls under matched settings. The result is meaningful but phase-bounded; final journal claims will be completed after street, fusion, and robustness phases.
 
-Extend with multimodal experiments, robustness statistics, per-city breakdowns, and a substantial explainability section.
+## Appendix Slots (Journal Completion)
 
-## Acknowledged Open Sections (to be filled later)
-
-- [TODO] Full street-only results table
-- [TODO] Full fusion results table
-- [TODO] Per-city leaderboard and failure taxonomy
-- [TODO] XAI figures and case narratives
-- [TODO] Cross-reference against CityLens official multimodal baselines
+- A. Data and split manifest: [TODO]
+- B. Full hyperparameter and run registry: [TODO]
+- C. Expanded per-task diagnostics: [TODO]
+- D. Per-city fairness and bias audit: [TODO]
+- E. XAI qualitative appendix: [TODO]
