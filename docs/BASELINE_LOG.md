@@ -1,6 +1,11 @@
 # Baseline Reproduction Log
 
-**Purpose:** Record one reproduced CityLens baseline (e.g. GPT-4o on GDP prediction) to verify the evaluation environment. This is the “control” experiment.
+**Purpose:** Record reproduced control baselines to verify the environment and support comparisons.
+
+Recommended controls now:
+- legacy CityLens API/LVLM baseline if you explicitly want paper-to-paper comparison
+- learned low-cost control from `evaluate.global_learned.feature_control`
+- learned satellite baseline from `evaluate.global_learned.train --branch satellite`
 
 ---
 
@@ -15,10 +20,11 @@
 
 ## Reproduced Experiment
 
-- **Task:** GDP prediction (global indicator)
-- **Model:** e.g. `gpt-4o`
-- **Prompt type:** `simple` (or `normalized` if you reproduce that)
-- **Cities:** `all` (or list if single-city)
+- **Task:** e.g. `gdp`
+- **Family:** `legacy_api_baseline` or `learned_control` or `learned_satellite`
+- **Model:** e.g. `gpt-4o`, `resnet50 feature_control`, `prithvi_rgb_lora`
+- **Protocol:** e.g. `simple`, `street_feature_control`, `satellite`
+- **Cities:** `all`
 
 ### Exact commands
 
@@ -26,12 +32,16 @@
 # 1. Generate task data (if not using pre-built Benchmark files)
 # python -m evaluate.global.global_indicator --city_name="all" --mode="gen" --task_name="gdp"
 
-# 2. Run evaluation (from CityLens repo root, with CITYLENS_DATA_ROOT set)
-# export CITYLENS_DATA_ROOT=/path/to/geo_ai1/data/CityLens-Data
+# 2a. Legacy API baseline (optional)
+# export CITYLENS_DATA_ROOT=/path/to/CityLens-Data
 # python -m evaluate.global.global_indicator --city_name="all" --mode="eval" --model_name="gpt-4o" --prompt_type="simple" --num_process=10 --task_name="gdp"
-
-# 3. Compute metrics
 # python -m evaluate.global.metrics --city_name="all" --model_name="gpt-4o" --prompt_type="simple" --task_name="gdp"
+
+# 2b. Low-cost learned control
+# python -m evaluate.global_learned.feature_control --task_name all --street_model resnet50 --image_size 224 --batch_size 8 --seed 42 --skip_if_done
+
+# 2c. Satellite learned baseline
+# python -m evaluate.global_learned.train --task_name all --branch satellite --satellite_model prithvi_rgb_lora --epochs 5 --batch_size 8 --image_size 224 --seed 42 --skip_if_done --resume
 ```
 
 *(Update with the exact commands you used and paths.)*
@@ -47,7 +57,7 @@
 | R²     | |
 | RMSE   | |
 
-*(Compare with paper/README if reported.)*
+*(Compare against CityLens README/paper if you reproduced the legacy baseline, or against your own learned controls if you are staying API-free.)*
 
 ---
 
@@ -60,5 +70,6 @@
 
 ## Notes
 
-- API keys required for GPT-4o: `OpenAI_API_KEY` or Azure (see CityLens README).
-- If the repo uses image URLs instead of local paths, ensure the dataset or Benchmark includes the URL mapping used by the eval script.
+- The current Colab notebook is API-free by default and focuses on `Results/global_learned/`.
+- Learned runs save `config.json`, `metrics.json`, `history.csv` or regression artifacts, and prediction CSVs under `CITYLENS_DATA_ROOT/Results/global_learned/`.
+- API keys are only required if you intentionally reproduce the original LVLM baselines.
