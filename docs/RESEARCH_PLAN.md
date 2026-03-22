@@ -56,12 +56,7 @@ Novel research: **geospatial foundation models (Prithvi)** on the **CityLens** b
 
 ---
 
-## Publication Strategy (Reminder for Later)
-
-- **Paper 1:** Fine-tuning Prithvi on CityLens + ensemble (e.g. IEEE TGRS, ISPRS, ACM TSAS).
-- **Paper 2:** Transfer learning UK → global cities (e.g. Computers, Environment and Urban Systems).
-- **Paper 3:** Full benchmark: “Beyond LVLMs: Multimodal Foundation Model Framework for Urban Socioeconomic Sensing” (e.g. Nature Cities / Nature Communications).
-
+## ..
 ---
 
 ## Dataset Verification
