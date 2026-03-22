@@ -2,6 +2,8 @@
 
 ## 1. Repo code (local / Colab after patch)
 
+> **Public repo note:** `CityLens/` and Colab notebooks were removed from this public tree. The table below describes changes that exist in a **full private checkout**.
+
 | File | Change |
 |------|--------|
 | **`CityLens/evaluate/gemini_adapter.py`** | **New.** Gemini API adapter: `GEMINI_MODEL_NAMES`, `_session_to_gemini_parts()`, `get_response_mllm_api_gemini()`. Uses `GOOGLE_API_KEY` or `GEMINI_API_KEY`. |
@@ -13,7 +15,9 @@ grep -n "GEMINI_MODEL_NAMES\|get_response_mllm_api_gemini" CityLens/evaluate/uti
 grep -n "GOOGLE_API_KEY\|get_response_mllm_api_gemini" CityLens/evaluate/gemini_adapter.py
 ```
 
-## 2. Colab notebook (`colab_citylens_full.ipynb`)
+## 2. Colab notebook *(removed from public repo; keep in private clone)*
+
+Formerly: `colab_citylens_full.ipynb`.
 
 | Section | Change |
 |---------|--------|
@@ -27,13 +31,10 @@ grep -n "GOOGLE_API_KEY\|get_response_mllm_api_gemini" CityLens/evaluate/gemini_
 
 | File | Change |
 |------|--------|
-| **`colab_install_packages.py`** | `"google-generativeai"` added to `PACKAGES`. |
+| **`colab_install_packages.py`** *(private clone only; removed here)* | `"google-generativeai"` added to `PACKAGES`. |
 | **Notebook install cell** | Same list includes `google-generativeai` (if using inline package list). |
 
-**Verify:**
-```bash
-grep "google-generativeai" colab_install_packages.py
-```
+**Verify (private checkout):** `grep "google-generativeai" colab_install_packages.py`
 
 ## 4. Colab: making Gemini work without re-download
 

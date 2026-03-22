@@ -8,7 +8,9 @@ This document describes the learned-model experimental stack for the 5 global Ci
 - `carbon`
 - `build_height`
 
-The implementation lives under `CityLens/evaluate/global_learned/` and is designed to be used from `colab_citylens_full.ipynb`.
+> **Public repo note:** The **`CityLens/`** implementation and Colab notebooks were removed from this public tree. This document remains as a **methodology reference**. Use a **private** GeoBench/CityLens checkout to run code.
+
+The implementation (private clone) lives under `CityLens/evaluate/global_learned/` and was designed for Colab / CLI drivers.
 
 ## Architectural stance
 
@@ -251,6 +253,8 @@ python -m evaluate.global_learned.ensemble_blend \
 
 **Do not duplicate tables here.** All satellite / street / fusion metrics, pivots, and fusion grids are maintained in a single place:
 
-- **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`** — sole maintained doc: all tables, narrative, limitations, ethics, future work.
+- **`docs/Report_for_writing.md`** / **`docs/Report_for_writing.pdf`** — merged manuscript + seed-42 tables (§4.3), discussion placeholders, references. Regenerate PDF with `docs/render_report_pdf.py`.
 
 **High-level outcome:** satellite **Prithvi** leads on `gdp` and `acc2health`; **fusion** (DINOv2 street + late) edges satellite only on **`build_height`**; **`pop`** remains difficult and fusion hurts. See the report for exact R² / RMSE and the full fusion configuration grid.
+
+**Paired reruns (shared val IDs, multi-seed):** claim boundaries → **`docs/CLAIMS_AND_REMAINING_RUNS.md`**; execution via **private** repo / notebooks.

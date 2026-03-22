@@ -76,4 +76,4 @@ Recommended controls now:
 
 ### Learned pipeline results (reproduced metrics)
 
-After you run `evaluate.global_learned.train`, record the command line and point to the experiment folder. **Aggregated R² / RMSE tables for satellite, street, and fusion (seed 42)** live in **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`** so this log stays lightweight—copy only the rows you personally reproduced into the table in § Results above.
+After you run training (in your **private** checkout), record the command line and point to the experiment folder. **Aggregated R² / RMSE tables for satellite, street, and fusion (seed 42)** are in **`docs/Report_for_writing.md`** §4.3 (PDF: **`docs/Report_for_writing.pdf`**) and the narrative in `docs/GLOBAL_LEARNED_PIPELINE.md`. **What you can claim vs what to run next** is spelled out in **`docs/CLAIMS_AND_REMAINING_RUNS.md`**. Copy only the rows you personally reproduced into the table in § Results above.
