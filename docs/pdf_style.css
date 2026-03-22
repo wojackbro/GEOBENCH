@@ -74,9 +74,20 @@ th, td {
 }
 
 th {
-  background: #f1f5f9;
+  background: #1e3a5f;
+  color: #f8fafc;
   font-family: "Helvetica Neue", "Arial", sans-serif;
   font-weight: 700;
+}
+
+/* Zebra + emphasis rows for results tables */
+tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+td.num, th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 thead { display: table-header-group; }

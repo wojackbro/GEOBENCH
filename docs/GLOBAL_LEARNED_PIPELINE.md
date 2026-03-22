@@ -69,6 +69,40 @@ Global logs:
 - `Results/global_learned/experiment_log.csv`
 - `Results/global_learned/splits/<task>_seed<seed>_val<frac>.json`
 
+## Street/Fusion data-path incident and fix
+
+During street/fusion activation in Colab, branch loading failed with:
+
+- `RuntimeError: No records available for branch=street task=<task>`
+
+Observed root cause:
+
+- task JSONs used legacy absolute paths from a different environment
+- local `street_view_image/` files used a different filename/ID namespace
+- net effect: `records_with_street_views = 0` even when `images` length was 11 in JSON
+
+Fix applied in workflow:
+
+1. validate `task_json`, `usable_records`, and `records_with_street_views` using `load_global_items(..., return_report=True)`
+2. rebuild local `Benchmark/<task>_all.json` with coordinate-based (lat/lon) street-path remapping
+3. re-verify nonzero street records before launching street/fusion runs
+
+Post-fix street-enabled subset counts:
+
+- `gdp`: 429
+- `acc2health`: 440
+- `build_height`: 398
+- `pop`: 402
+
+Street-only best results currently observed on this subset:
+
+- `gdp`: `resnet50` (`R2=0.3629`)
+- `acc2health`: `resnet50` (`R2=0.3299`)
+- `build_height`: `resnet50` (`R2=0.3448`)
+- `pop`: `dinov2_vitb14` (`R2=0.0058`)
+
+Important: these counts differ from earlier satellite totals, so strict cross-branch comparisons should use matched-subset reruns or be explicitly labeled as subset-mismatched.
+
 Use both flags when running in Colab:
 
 - `--skip_if_done`
@@ -192,3 +226,31 @@ CityLens does not provide the six native HLS bands required for a real spectral 
 8. `gated` fusion
 
 Keep `swin_t` optional unless Colab runtime is stable.
+
+## Post-hoc satellite + street ensemble (optional)
+
+You **cannot** pick “whichever model was right” per sample at inference time without labels.
+
+`evaluate/global_learned/ensemble_blend.py` does two **valid** things on the validation set:
+
+1. **Convex blend:** find `w ∈ [0,1]` minimizing MSE of `ŷ = w·ŷ_sat + (1-w)·ŷ_street` (raw space after `log1p` decode), then fix `w` for deployment.
+2. **Oracle bound (analysis only):** per sample, use the prediction closer to `y` — **not deployable**; shows whether modalities could be complementary if a perfect selector existed.
+
+Use `--split_branch fusion` so val IDs match the street-available cohort (same idea as fair fusion comparison).
+
+```bash
+python -m evaluate.global_learned.ensemble_blend \
+  --task_name gdp \
+  --data_root "$CITYLENS_DATA_ROOT" \
+  --sat_exp_dir .../gdp/<satellite-exp-folder> \
+  --street_exp_dir .../gdp/<street-exp-folder> \
+  --split_branch fusion
+```
+
+## Results snapshot (seed 42) — where to look
+
+**Do not duplicate tables here.** All satellite / street / fusion metrics, pivots, and fusion grids are maintained in a single place:
+
+- **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`** — sole maintained doc: all tables, narrative, limitations, ethics, future work.
+
+**High-level outcome:** satellite **Prithvi** leads on `gdp` and `acc2health`; **fusion** (DINOv2 street + late) edges satellite only on **`build_height`**; **`pop`** remains difficult and fusion hurts. See the report for exact R² / RMSE and the full fusion configuration grid.

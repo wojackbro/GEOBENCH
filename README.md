@@ -4,22 +4,23 @@ This repository tracks an end-to-end workflow for CityLens regression experiment
 
 - `prithvi_rgb_lora` (satellite geospatial FM adaptation)
 - controlled satellite baselines (`dinov2_sat`, `resnet50_sat`)
-- planned street-only and fusion phases (`clip_vitb16`, `late`, `gated`)
+- street-only and fusion phases (`clip_vitb16`, `late`, `gated`) — see official report
 
 ## Current status
 
-- Satellite-only comparison is complete for `gdp`, `acc2health`, `build_height`, `pop`.
-- `prithvi_rgb_lora` is the strongest model across those four tasks.
-- Important caveat: `gdp + resnet50_sat` shows failed behavior (highly negative R2) and is reported transparently.
-- Street-only, fusion, per-city, and full XAI analysis are pending.
+**Single source of truth:** `docs/OFFICIAL_REPORT_SATELLITE_PHASE.md` (satellite + street + fusion tables, methods, limitations, ethics, future work).
 
-See:
+- Satellite, street, and fusion **seed-42 snapshots** for `gdp`, `acc2health`, `build_height`, `pop` are documented there.
+- `prithvi_rgb_lora` is the strongest **satellite** backbone on those tasks; `gdp + resnet50_sat` remains a documented failure (negative R²).
+- Fusion improves R² only on **`build_height`** in this snapshot; satellite Prithvi leads **`gdp`** and **`acc2health`**.
+- Per-city, multi-seed, and shared-ID validation are still open.
 
-- `docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`
-- `docs/PAPER_CONFERENCE_DRAFT.md`
-- `docs/PAPER_Q1_JOURNAL_DRAFT.md`
+See also:
+
 - `docs/PRITHVI_SATELLITE_REFERENCE.md`
 - `docs/GLOBAL_LEARNED_PIPELINE.md`
+
+*(Journal/conference draft files under `docs/` are stubs that point to the official report—do not maintain duplicate tables there.)*
 
 ## Recommended execution path
 
@@ -117,6 +118,7 @@ Global logs:
 
 - complete street-only matrix (`clip_vitb16`, `resnet50`, `dinov2_vitb14`)
 - complete fusion matrix (`late`, `gated`)
+- rerun satellite anchors on the same street-enabled subset for strict fairness
 - run per-city error analysis
 - run XAI package (`explain.py`) and integrate qualitative findings into paper drafts
 - add multi-seed confidence intervals for publication-grade claims

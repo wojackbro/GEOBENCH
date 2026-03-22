@@ -90,8 +90,9 @@ def compute_metrics(y_true: Iterable[float], y_pred: Iterable[float]) -> Dict[st
     mse = mean_squared_error(y_true, y_pred)
     mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
-    rmse = mean_squared_error(y_true, y_pred, squared=False)
-    return {"mse": float(mse), "mae": float(mae), "r2": float(r2), "rmse": float(rmse)}
+    # sklearn>=1.6 removed mean_squared_error(..., squared=False); sqrt(MSE) is stable across versions
+    rmse = float(np.sqrt(mse))
+    return {"mse": float(mse), "mae": float(mae), "r2": float(r2), "rmse": rmse}
 
 
 def save_json(path: Path, payload: Dict) -> None:

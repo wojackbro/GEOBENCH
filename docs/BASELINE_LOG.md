@@ -73,3 +73,7 @@ Recommended controls now:
 - The current Colab notebook is API-free by default and focuses on `Results/global_learned/`.
 - Learned runs save `config.json`, `metrics.json`, `history.csv` or regression artifacts, and prediction CSVs under `CITYLENS_DATA_ROOT/Results/global_learned/`.
 - API keys are only required if you intentionally reproduce the original LVLM baselines.
+
+### Learned pipeline results (reproduced metrics)
+
+After you run `evaluate.global_learned.train`, record the command line and point to the experiment folder. **Aggregated R² / RMSE tables for satellite, street, and fusion (seed 42)** live in **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.md`** so this log stays lightweight—copy only the rows you personally reproduced into the table in § Results above.
