@@ -13,9 +13,9 @@
 | **Satellite** | `prithvi_rgb_lora` | **42** | `gdp`, `acc2health`, `build_height`, `pop` | `PRITHVI_SATELLITE_REFERENCE.md` (full protocol + table) |
 | **Satellite** | `prithvi_rgb_lora` | 42 | **`carbon` — not listed** | — |
 | **Street** | `resnet50` (and `dinov2_vitb14` on `pop`) | **42** (implied by pipeline narrative) | `gdp`, `acc2health`, `build_height`, `pop` | `GLOBAL_LEARNED_PIPELINE.md` (R² snapshot only) |
-| **Fusion + full grids** | e.g. Prithvi + DINOv2 street + `late` | **42** (per PDF) | Detailed in `Report_for_writing.md` §4.3 / PDF | `Report_for_writing.pdf` |
+| **Fusion + full grids** | e.g. Prithvi + DINOv2 street + `late` | **42** | Full tables in `Report_for_writing.md` §4.3.1–4.3.5 | `Report_for_writing.pdf`, `OFFICIAL_REPORT_SATELLITE_PHASE.pdf` |
 
-So: **seed-42 Prithvi satellite** on **four** tasks is the most **detailed** lock file in git. Street/fusion are still **fully citable** via the **PDF** (and the pipeline summary); the only methodological caveat is **paired val IDs** across modalities (see §3), not “missing metrics files.”
+So: **seed-42** **full** satellite / street / fusion grids live in **`Report_for_writing.md` §4.3** (and PDFs). **`PRITHVI_SATELLITE_REFERENCE.md`** is the **tight lock** for Prithvi-only satellite rows (may differ slightly from one row in the big grid by checkpoint — see §4.3.1 note). The methodological caveat for **cross-branch ranking** is still **paired val IDs** (see §3).
 
 ---
 

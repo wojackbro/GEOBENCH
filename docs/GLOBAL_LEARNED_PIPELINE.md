@@ -253,7 +253,8 @@ python -m evaluate.global_learned.ensemble_blend \
 
 **Do not duplicate tables here.** All satellite / street / fusion metrics, pivots, and fusion grids are maintained in a single place:
 
-- **`docs/Report_for_writing.md`** / **`docs/Report_for_writing.pdf`** — merged manuscript + seed-42 tables (§4.3), discussion placeholders, references. Regenerate PDF with `docs/render_report_pdf.py`.
+- **`docs/Report_for_writing.md`** / **`docs/Report_for_writing.pdf`** — manuscript + **full** seed-42 satellite/street/fusion grids + cross-branch table (§4.3). Regenerate PDF with `docs/render_report_pdf.py`.
+- **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.pdf`** — original long-form technical report (failures, explainability, ethics).
 
 **High-level outcome:** satellite **Prithvi** leads on `gdp` and `acc2health`; **fusion** (DINOv2 street + late) edges satellite only on **`build_height`**; **`pop`** remains difficult and fusion hurts. See the report for exact R² / RMSE and the full fusion configuration grid.
 

@@ -17,7 +17,7 @@
 
 **Methodology:** For each task and random seed, we fix a **shared validation cohort** on the **street-available subset** so that **satellite-only, street-only, and fusion** models are scored on **identical held-out region IDs**; we report **multi-seed** metrics to quantify instability.
 
-**Results (seed 42, single run — see §4.3):** On satellite, **Prithvi + LoRA** reaches **R² = 0.58** on `gdp`, **0.39** on `acc2health`, **0.87** on `build_height`, and **negative R²** on `pop` under the locked protocol. Street-only **ResNet-50** on the street cohort reaches **R² ≈ 0.36 / 0.33 / 0.34** on `gdp` / `acc2health` / `build_height`; **fusion** in the documented snapshot helps **only** on **`build_height`** vs. satellite Prithvi, while **`pop`** stays difficult. *[Replace with mean ± std after multi-seed shared-split runs.]*
+**Results (seed 42 — full tables §4.3):** **Satellite:** **`prithvi_rgb_lora`** leads sane baselines on all four tasks; **`gdp` + `resnet50_sat`** is catastrophic (R² ≈ **−4**). **Street:** best encoder varies (**ResNet-50** vs **DINOv2** on `pop`). **Fusion:** **only `build_height`** (DINOv2 street + **late**) beats best satellite; **`gdp` / `acc2health`** still favor satellite Prithvi; **`pop`** fusion scores are negative. **R² / RMSE / MAE** for every run are in **§4.3.1–4.3.3** and **`OFFICIAL_REPORT_SATELLITE_PHASE.pdf`**. *[Replace abstract numbers with mean ± std after multi-seed shared-split reruns.]*
 
 **Impact:** We provide a **transparent protocol** (shared splits, seeds, and baselines) for comparing Earth-observation FMs and generic vision encoders on spatial regression. *[Adjust if code is private: e.g., “Implementation details and reproducibility artifacts are available under collaboration / upon request.”]*
 
@@ -146,61 +146,103 @@ The following match **`docs/PRITHVI_SATELLITE_REFERENCE.md`** (satellite-only `p
 
 ### 4.3 Main quantitative results — seed 42 snapshot *(single seed; not variance)*
 
-**Protocol notes**
+**Metrics:** This benchmark is **regression** (scalar targets). Report **R²**, **RMSE**, **MAE** — not classification accuracy.
 
-- **Satellite Prithvi** rows: **seed 42**, **val fraction 0.1**, **target transform log1p**, metrics in **raw** space — as locked for comparison baselines (`dinov2_sat`, `resnet50_sat`).
-- **Street** rows: **street-available cohort** sizes differ from full satellite totals; R² values follow **`docs/GLOBAL_LEARNED_PIPELINE.md`** (subset-matched street training). Pull **RMSE / best epoch** from each run’s `metrics.json` under `Results/global_learned/` if you need them in the paper.
-- **Fusion:** narrative reflects the **documented snapshot**; the **full fusion backbone grid** should be pasted into the placeholder table once consolidated from experiments.
+**Protocol (core):** image **224**, batch **8**, seed **42**, target **`log1p`**, lr **2e-4** / head **1e-3**, weight decay **1e-2**, val fraction **0.1**. Epoch budgets: **`gdp` 20**; **`acc2health`** & **`build_height` 30**; **`pop` 5**. Fusion: satellite **Prithvi** + timm street encoder; **late** = concat features; **gated** = learned gating (see pipeline doc).
 
-#### 4.3.1 Satellite-only — `prithvi_rgb_lora` (seed 42)
+**Caveats (from official technical report):** Satellite-only runs may include `clip_vitb16` in the **folder slug**; they do **not** use CLIP street images. Street/fusion use the **remapped street-enabled subset**; satellite val IDs may **differ** from street/fusion — treat the **cross-branch** row as **indicative**, not a strict paired A/B until shared-split reruns land.
 
-| Task | Epoch budget | Best epoch | R² | RMSE |
-| --- | ---: | ---: | ---: | ---: |
-| `gdp` | 20 | 14 | 0.5808 | 331463584.0 |
-| `acc2health` | 30 | 9 | 0.3901 | 9.5502 |
-| `build_height` | 30 | 9 | 0.8682 | 2.5345 |
-| `pop` | 5 | 2 | -0.0324 | 21641.2461 |
+**Archived PDF:** identical tables and narrative live in **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.pdf`** (restored from project history).
 
-*Do not cite Prithvi on `carbon` without a dedicated locked row.*
+#### 4.3.1 Satellite-only — full grid *(seed 42)*
 
-#### 4.3.2 Street-only (seed 42, street cohort)
+| Task | Model | Best epoch | R² | RMSE | MAE |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `acc2health` | `dinov2_sat` | 20 | 0.0985 | 11.6113 | 8.7746 |
+| `acc2health` | `prithvi_rgb_lora` | 9 | 0.3901 | 9.5502 | 7.1910 |
+| `acc2health` | `resnet50_sat` | 22 | 0.2124 | 10.8529 | 7.2042 |
+| `build_height` | `dinov2_sat` | 18 | 0.6791 | 3.9542 | 2.8124 |
+| `build_height` | `prithvi_rgb_lora` | 11 | 0.8599 | 2.6130 | 1.9100 |
+| `build_height` | `resnet50_sat` | 26 | 0.8004 | 3.1182 | 2.2806 |
+| `gdp` | `dinov2_sat` | 19 | 0.4535 | 3.7845e8 | 2.3281e8 |
+| `gdp` | `prithvi_rgb_lora` | 14 | 0.5808 | 3.3146e8 | 1.9811e8 |
+| `gdp` | `resnet50_sat` | 5 | **−4.0046** | 1.1452e9 | 3.9336e8 |
+| `pop` | `dinov2_sat` | 5 | −0.1840 | 23175.54 | 11363.06 |
+| `pop` | `prithvi_rgb_lora` | 2 | −0.0324 | 21641.25 | 10020.26 |
+| `pop` | `resnet50_sat` | 2 | −0.2661 | 23965.72 | 11871.83 |
 
-**Cohort sizes** (records with usable street views, post path fix):
+**Bold:** catastrophic baseline — **do not** treat `gdp` + `resnet50_sat` as a fair comparator (see failure analysis in the official PDF).
 
-| Task | Street-cohort records |
-| --- | ---: |
-| `gdp` | 429 |
-| `acc2health` | 440 |
-| `build_height` | 398 |
-| `pop` | 402 |
+**Extra Prithvi satellite folders (other epoch budgets):** `acc2health` ep5 → R² **0.3034**; `build_height` ep5 → **0.8326**; `gdp` ep10 → **0.5667**; `gdp` ep5 run (best ep1) → **0.1912**. The separately locked row in **`PRITHVI_SATELLITE_REFERENCE.md`** uses **`build_height` R² = 0.8682** / best epoch **9** (different checkpoint than the row above — cite **one** convention per paper).
 
-**Best R²** observed for the listed default street backbones:
+*Extension task **`carbon`:** not in this table; add a row only after you lock a protocol.*
 
-| Task | Model | R² |
-| --- | --- | ---: |
-| `gdp` | `resnet50` | 0.3629 |
-| `acc2health` | `resnet50` | 0.3299 |
-| `build_height` | `resnet50` | 0.3448 |
-| `pop` | `dinov2_vitb14` | 0.0058 |
+#### 4.3.2 Street-only — full grid *(seed 42, remapped subset)*
 
-#### 4.3.3 Fusion (seed 42) — narrative summary
+**Subset sizes:** `gdp` **429**, `acc2health` **440**, `build_height` **398**, `pop` **402**. **Bold** = best R² per task.
 
-- Satellite **Prithvi** leads on **`gdp`** and **`acc2health`**.
-- **Fusion** (e.g., DINOv2 street + **late** fusion in the full configuration grid) improves over satellite **only** on **`build_height`** in the documented snapshot.
-- **`pop`** remains difficult; fusion can **hurt** vs. satellite.
+| Task | Street encoder | Best epoch | R² | RMSE | MAE |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `gdp` | **`resnet50`** | 7 | **0.3629** | 4.5277e8 | 3.0879e8 |
+| `gdp` | `dinov2_vitb14` | 13 | 0.0342 | 5.5746e8 | 3.4419e8 |
+| `gdp` | `clip_vitb16` | 19 | −0.0287 | 5.7530e8 | 3.3851e8 |
+| `acc2health` | **`resnet50`** | 21 | **0.3299** | 8.9596 | 6.3076 |
+| `acc2health` | `dinov2_vitb14` | 11 | 0.0100 | 10.8903 | 7.4473 |
+| `acc2health` | `clip_vitb16` | 3 | −0.0031 | 10.9619 | 7.3645 |
+| `build_height` | **`resnet50`** | 10 | **0.3448** | 5.7259 | 4.5244 |
+| `build_height` | `dinov2_vitb14` | 22 | 0.3371 | 5.7597 | 4.6357 |
+| `build_height` | `clip_vitb16` | 17 | 0.2338 | 6.1918 | 4.9163 |
+| `pop` | **`dinov2_vitb14`** | 2 | **0.0058** | 12341.28 | 9162.27 |
+| `pop` | `clip_vitb16` | 5 | −0.3057 | 14142.77 | 9081.77 |
+| `pop` | `resnet50` | 2 | −0.4352 | 14827.64 | 9242.04 |
 
-**Summary table (best modality, snapshot):**
+#### 4.3.3 Fusion — full grid *(Prithvi satellite + street; seed 42)*
 
-| Task | Best modality (snapshot) | Note |
-| --- | --- | --- |
-| `gdp` | Satellite (Prithvi) | — |
-| `acc2health` | Satellite (Prithvi) | — |
-| `build_height` | Fusion (selected config) | Only task where fusion edges satellite |
-| `pop` | — | Weak; fusion often worse |
+**Definition:** **Prithvi** (sat) + street encoder; **late** or **gated**. Metrics from validation **`metrics.json`**.
 
-**Space for full fusion grid:** paste task × satellite backbone × street backbone × fusion type after consolidating `metrics.json` exports.
+**Not run in this snapshot:** `acc2health` + DINO street fusion; CLIP street fusion for **`build_height`** / **`pop`**.
 
-#### 4.3.4 Multi-seed results with shared validation *(required for robust claims)*
+| Task | Street encoder | Fusion | Epochs | Best epoch | R² | RMSE |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `acc2health` | `clip_vitb16` | gated | 30 | 19 | 0.1672 | 9.9885 |
+| `acc2health` | `clip_vitb16` | late | 30 | 13 | 0.1347 | 10.1811 |
+| `acc2health` | `resnet50` | gated | 30 | 3 | 0.1612 | 10.0244 |
+| `acc2health` | `resnet50` | late | 30 | 12 | 0.1909 | 9.8452 |
+| `build_height` | `dinov2_vitb14` | gated | 30 | 21 | 0.8653 | 2.5963 |
+| `build_height` | `dinov2_vitb14` | late | 30 | 23 | **0.8723** | 2.5274 |
+| `build_height` | `resnet50` | gated | 30 | 28 | 0.8593 | 2.6532 |
+| `build_height` | `resnet50` | late | 30 | 28 | 0.8484 | 2.7541 |
+| `gdp` | `clip_vitb16` | gated | 20 | 18 | 0.0151 | 5.6292e8 |
+| `gdp` | `clip_vitb16` | late | 20 | 18 | 0.3450 | 4.5909e8 |
+| `gdp` | `dinov2_vitb14` | gated | 20 | 2 | 0.0172 | 5.6234e8 |
+| `gdp` | `dinov2_vitb14` | late | 20 | 20 | 0.3966 | 4.4061e8 |
+| `gdp` | `resnet50` | gated | 20 | 20 | 0.4437 | 4.2306e8 |
+| `gdp` | `resnet50` | late | 20 | 6 | 0.3713 | 4.4975e8 |
+| `pop` | `dinov2_vitb14` | gated | 5 | 1 | −0.3291 | 14269 |
+| `pop` | `dinov2_vitb14` | late | 5 | 5 | −0.4849 | 15082 |
+| `pop` | `resnet50` | gated | 5 | 4 | −0.2942 | 14080 |
+| `pop` | `resnet50` | late | 5 | 4 | −0.3487 | 14374 |
+
+**Per-task takeaway:** **`gdp`** — best fusion **<** satellite Prithvi; **`acc2health`** — best fusion **<** best satellite & street; **`build_height`** — **DINOv2 street + late** **>** best satellite R² (**only clear fusion win**); **`pop`** — all fusion R² **negative**.
+
+#### 4.3.4 Cross-branch comparison *(indicative; val IDs may not match across branches)*
+
+| Task | Satellite (best R²) | Street (best R²) | Fusion (best R²) | Max R² | Leading modality |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `gdp` | 0.5808 | 0.3629 | 0.4437 | 0.5808 | Satellite |
+| `acc2health` | 0.3901 | 0.3299 | 0.1909 | 0.3901 | Satellite |
+| `build_height` | 0.8599 | 0.3448 | 0.8723 | 0.8723 | Fusion |
+| `pop` | −0.0324 | 0.0058 | −0.2942 | 0.0058 | Street *(weak)* |
+
+#### 4.3.5 Executive one-liners *(same snapshot)*
+
+| Layer | Headline |
+| --- | --- |
+| **Satellite** | **`prithvi_rgb_lora`** best among sane satellite runs on all four tasks; **`gdp` + `resnet50_sat`** fails (R² ≈ **−4.0**). |
+| **Street** | Best encoder **task-dependent:** **`resnet50`** (`gdp`, `acc2health`, `build_height`); **`dinov2_vitb14`** (`pop`). |
+| **Fusion** | Prithvi + street, late/gated: **only `build_height`** beats best satellite on R²; **`gdp` / `acc2health`** still favor satellite Prithvi; **`pop`** fusion R² negative. |
+
+#### 4.3.6 Multi-seed results with shared validation *(required for robust claims)*
 
 | Task | Branch / model | Seed(s) | R² (mean ± std) | RMSE (mean ± std) | Notes |
 |------|----------------|---------|-----------------|-------------------|--------|

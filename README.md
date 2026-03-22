@@ -12,7 +12,8 @@ This repository is maintained as a **public-facing documentation set** for the C
 
 Run from repo root: **`.venv-pdf/bin/python docs/render_report_pdf.py`** (needs **`pandoc`** + WeasyPrint in `.venv-pdf`).
 
-- **`docs/Report_for_writing.pdf`** — single export from **`Report_for_writing.md`**: full manuscript **and** **seed-42** tables (satellite / street / fusion summary) in §4.3.
+- **`docs/Report_for_writing.pdf`** — export from **`Report_for_writing.md`**: full manuscript + **complete seed-42 grids** (satellite / street / fusion + cross-branch) in §4.3.
+- **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.pdf`** — archived original technical report (same numbers; narrative on failures, XAI, ethics).
 
 ## Supporting docs
 
