@@ -1,3 +1,6 @@
+# Local-only documentation (not published on public GitHub — keep your copy here)
+docs/
+
 # Data and outputs
 data/
 *.zip

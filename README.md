@@ -1,26 +1,10 @@
 # GeoBench (documentation & writing bundle)
 
-This repository is maintained as a **public-facing documentation set** for the CityLens / GeoBench geospatial regression line of work.
+This repository supports the CityLens / GeoBench geospatial regression line of work.
 
-**Implementation note:** The **`CityLens/`** codebase, **Colab notebooks** (`.ipynb`), and **`scripts/`** utilities were **removed from this tree** so they are not shared publicly. Keep a **private clone** of your full project (e.g. upstream [GeoBench](https://github.com/wojackbro/GeoBench) / CityLens sources) for training and reproduction.
+## Primary reference document
 
-## Primary writing document
-
-- **`docs/Report_for_writing.md`** — conference-style manuscript shell: abstract, introduction, related work, methodology (all model architectures, **LoRA**, **shared val splits**, **multi-seed**), experiments, discussion placeholders, conclusion, and starter references (with web-backed citations for Prithvi-EO, DINOv2, CLIP, ResNet, LoRA/PEFT).
-
-## PDF (regenerate from markdown)
-
-Run from repo root: **`.venv-pdf/bin/python docs/render_report_pdf.py`** (needs **`pandoc`** + WeasyPrint in `.venv-pdf`).
-
-- **`docs/Report_for_writing.pdf`** — export from **`Report_for_writing.md`**: full manuscript + **complete seed-42 grids** (satellite / street / fusion + cross-branch) in §4.3.
-- **`docs/OFFICIAL_REPORT_SATELLITE_PHASE.pdf`** — archived original technical report (same numbers; narrative on failures, XAI, ethics).
-
-## Supporting docs
-
-- `docs/CLAIMS_AND_REMAINING_RUNS.md` — claim boundaries and run plan (references may mention removed notebooks; use private repo to execute).
-- `docs/PAIRED_SPLITS_AND_MULTI_SEED.md` — shared split + multi-seed protocol description.
-- `docs/GLOBAL_LEARNED_PIPELINE.md` — pipeline narrative (implementation paths refer to removed `CityLens/`; keep for methodology wording).
-- `docs/PRITHVI_SATELLITE_REFERENCE.md` — Prithvi-focused notes.
+**`paper_curent_draft.docx`** — main paper draft (**canonical** manuscript for this project).
 
 ---
 
@@ -63,18 +47,18 @@ Use this as a **reading list** for related work and implementation context. Norm
 | **Street-view & overhead imagery → socioeconomic outcomes** | Search “street view income prediction”, “remote sensing socioeconomic”, *Science* / *PNAS* style urban sensing | Use [Google Scholar](https://scholar.google.com/) or [Semantic Scholar](https://www.semanticscholar.org/) with those queries; cite 3–5 **recent** + **foundational** papers in your intro. |
 | **Multimodal / late fusion** | Generic late fusion, gating | Survey papers on *multimodal deep learning* (Baltrušaitis *et al.*, TPAMI 2019 is a common survey) — [arXiv:1705.09406](https://arxiv.org/abs/1705.09406) |
 
-### E. Explainability & evaluation rigor (aligned with `OFFICIAL_REPORT`)
+### E. Explainability & evaluation rigor
 
 | Topic | Resource | Links |
 |--------|----------|--------|
-| **Integrated Gradients** | Attribution for CNNs/ViTs (satellite branch in pipeline doc) | Sundararajan *et al.*, ICML 2017 — [arXiv:1703.01365](https://arxiv.org/abs/1703.01365) · [Captum (PyTorch)](https://github.com/pytorch/captum) |
+| **Integrated Gradients** | Attribution for CNNs/ViTs | Sundararajan *et al.*, ICML 2017 — [arXiv:1703.01365](https://arxiv.org/abs/1703.01365) · [Captum (PyTorch)](https://github.com/pytorch/captum) |
 | **Spatial ML / leakage** | Train/test leakage in geospatial data | Search *“geospatial cross-validation”*, *“spatial leakage machine learning”*; cite e.g. Roberts *et al.*–style spatial CV work as appropriate to your claims. |
 | **Multi-seed reporting** | Variance in deep learning | Report mean ± std; see venue reproducibility checklists (e.g. NeurIPS / CVPR). |
 
-### F. This repo’s manuscript references (duplicate short list)
+### F. Local `docs/` folder (not on GitHub)
 
-The same core citations are expanded in prose in **`docs/Report_for_writing.md`** (§2 Related work, § References). Use **§4.3** there for **your** empirical tables; use the PDFs in `docs/` for the locked seed-42 numbers.
+The **`docs/`** directory is **gitignored** — it is **not** pushed to this public repository. Keep tables, markdown notes, PDFs, and render scripts **only on your machine**. The **primary reference** for the written paper is still **`paper_curent_draft.docx`** (which *is* tracked unless you ignore it separately).
+
+*Note:* Older commits may still contain `docs/` in history; to scrub from GitHub entirely you’d need history rewriting (e.g. `git filter-repo`). New clones will not receive `docs/`.
 
 ---
-
-*For dataset layout and setup concepts, see `docs/SETUP.md` and `docs/AFTER_DOWNLOAD.md` (they still describe a full `CityLens/` checkout; adapt if you only keep docs publicly).*
