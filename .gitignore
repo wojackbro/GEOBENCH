@@ -33,7 +33,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-CityLens/evaluate/global_learned/*.py
 
 # IDE
 .idea/

@@ -52,7 +52,8 @@ We then completed a **paired, shared-split, two-seed study** (seeds **42** and *
 ## Repository notes
 
 - The **`docs/`** directory is **gitignored** on the public remote (manuscript tables, supplementary PDFs, render scripts stay local). **`paper_curent_draft.docx`** remains the primary writing source unless you ignore it separately.
-- **`CityLens/evaluate/global_learned/*.py`** may be gitignored so the public tree stays documentation-forward; use a **private** checkout for full training code.
+- **`notebooks/`** — Colab exports (`colab_citylens_full.ipynb`, `colab_citylens_baseline_compare.ipynb`). Open in Colab or Jupyter; set `CITYLENS_DATA_ROOT` and paths to match your Drive layout.
+- **`CityLens/evaluate/global_learned/`** — training and split scripts (`train.py`, `data.py`, `models.py`, etc.); run from the `CityLens` repo root as `python -m evaluate.global_learned.…`.
 
 **Data & upstream benchmark**
 
